@@ -10,6 +10,10 @@ const connectDB = async () => {
   }
 
   try {
+    const conn = await mongoose.connect(mongoUri, {
+      serverSelectionTimeoutMS: 10000,
+    });
+
     mongoose.connection.on("error", (error) => {
       console.error("MongoDB runtime error:", error.message);
     });
@@ -18,16 +22,12 @@ const connectDB = async () => {
       console.warn("MongoDB disconnected.");
     });
 
-    const conn = await mongoose.connect(mongoUri, {
-      serverSelectionTimeoutMS: 10000,
-    });
-
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     return conn;
   } catch (error) {
     const atlasHelp =
       error.name === "MongooseServerSelectionError"
-        ? "Check your MONGO_URI, Atlas database user credentials, IP access list, and internet connection."
+        ? `Check your MONGO_URI, Atlas database user credentials, IP access list, and internet connection. Original error: ${error.message}`
         : error.message;
 
     throw new Error(`MongoDB connection failed. ${atlasHelp}`);
